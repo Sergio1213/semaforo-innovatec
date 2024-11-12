@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Checkbox } from "@/components/ui/checkbox"
-
 
 interface TimerConfig {
   totalTime: number;
@@ -23,10 +22,12 @@ export default function CronometroPersonalizado() {
   const [isLoading, setIsLoading] = useState(true)
   const [isChecked, setIsChecked] = useState(true); // Added state for checkbox
 
-  const handleCheckboxChange = () => {
-    setIsChecked(!isChecked);
-  };
+  // Referencia al audio
+  const audioRef = useRef<HTMLAudioElement>(new Audio('/alarm.mp3'))
 
+  const handleCheckboxChange = () => {
+    setIsChecked(!isChecked)
+  }
 
   useEffect(() => {
     const loadConfig = async () => {
@@ -43,6 +44,11 @@ export default function CronometroPersonalizado() {
       setIsLoading(false)
     }
     loadConfig()
+    return () => {
+      // Limpiar el audio al desmontar el componente
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+    }
   }, [])
 
   useEffect(() => {
@@ -53,9 +59,19 @@ export default function CronometroPersonalizado() {
       }, 1000)
     } else if (timeLeft === 0) {
       setIsRunning(false)
+      stopSound()
     }
+
+    // Iniciar o detener el sonido según el tiempo restante
+    if (isRunning && timeLeft <= 5 && timeLeft > 0) {
+      playSound()
+    } else {
+      stopSound()
+    }
+
     return () => {
       if (interval) clearInterval(interval)
+      stopSound()
     }
   }, [isRunning, timeLeft])
 
@@ -96,6 +112,15 @@ export default function CronometroPersonalizado() {
     setShowConfig(false)
   }
 
+  const playSound = () => {
+    audioRef.current.play()
+  }
+
+  const stopSound = () => {
+    audioRef.current.pause()
+    audioRef.current.currentTime = 0
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <nav className=" p-4 flex items-center">
@@ -108,7 +133,7 @@ export default function CronometroPersonalizado() {
         />
         <h1 className="text-2xl font-bold">Cronómetro Personalizado</h1>
       </nav>
-      <main className={`flex-grow flex flex-col items-center justify-center ${getBackgroundColor()} transition-colors duration-300`}>
+      <main className={`flex-grow flex flex-col items-center justify-center ${getBackgroundColor()} ${timeLeft <= 5 && isRunning ? 'animate-pulse' : ''} transition-colors duration-300`}>
         {isLoading ? (
           <div className="w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-10 lg:py-20">
             <Skeleton className="h-32 w-full mb-8" />
@@ -142,7 +167,7 @@ export default function CronometroPersonalizado() {
           </form>
         ) : (
           <div className="w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-10 lg:py-20">
-            <div className={`text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-8 text-center ${isChecked ? 'text-black' : 'text-transparent'} ${timeLeft <= 5 && isRunning ? 'animate-pulse' : ''}`}>
+            <div className={`text-6xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-8 text-center ${isChecked ? 'text-black' : 'text-transparent'} `}>
               {formatTime(timeLeft)}
             </div>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">

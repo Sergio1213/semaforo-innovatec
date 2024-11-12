@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,12 +9,21 @@ export default function Cronometro() {
   const [timeLeft, setTimeLeft] = useState(180) // 3 minutos en segundos
   const [isRunning, setIsRunning] = useState(false)
   const [isChecked, setIsChecked] = useState<boolean>(true);
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const audioRef = useRef<HTMLAudioElement>(new Audio('/alarm.mp3'));
 
+  const playSound = () => {
+    audioRef.current.play();
+  }
+
+  const stopSound = () => {
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+  }
   // Función para manejar el cambio de estado del checkbox
   const handleCheckboxChange = (checked: boolean) => {
     setIsChecked(checked);
   };
-
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
@@ -22,11 +31,27 @@ export default function Cronometro() {
       interval = setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1)
       }, 1000)
+
+      // Iniciar el sonido cuando quedan 5 segundos o menos
+      if (timeLeft <= 5) {
+        playSound()
+      } else {
+        stopSound()
+      }
     } else if (timeLeft === 0) {
       setIsRunning(false)
+      stopSound()
+    } else {
+      stopSound()
     }
+    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
     return () => {
       if (interval) clearInterval(interval)
+      // Limpiar el contexto de audio al desmontar el componente
+      if (audioContextRef.current) {
+        audioContextRef.current.close()
+      }
+      stopSound()
     }
   }, [isRunning, timeLeft])
 
@@ -53,7 +78,6 @@ export default function Cronometro() {
     return 'bg-white'
     
   }
-
   return (
     <div className="h-full flex flex-col">
       <nav className="p-2 flex items-center">
@@ -66,9 +90,9 @@ export default function Cronometro() {
         />
         <h1 className="text-2xl font-bold">Cronómetro Pitch deck</h1>
       </nav>
-      <main className={`flex-grow flex flex-col items-center justify-center ${getBackgroundColor()} ${timeLeft <= 5 ? 'animate-pulse' : ''} transition-colors duration-300`}>
+      <main className={`flex-grow flex flex-col items-center justify-center ${getBackgroundColor()} ${timeLeft > 0 && timeLeft <= 5 ? 'animate-pulse' : ''} transition-colors duration-300`}>
         <div className="w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-10 lg:py-20">
-          <div className={`text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-8 text-center  ${isChecked ? 'text-black' : 'text-transparent'}`}>
+          <div className={`text-6xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-8 text-center  ${isChecked ? 'text-black' : 'text-transparent'}`}>
             {formatTime(timeLeft)}
           </div>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">

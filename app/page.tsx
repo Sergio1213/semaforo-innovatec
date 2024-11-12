@@ -1,32 +1,54 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { Checkbox } from '@/components/ui/checkbox'
 
 export default function Cronometro() {
-  const [timeLeft, setTimeLeft] = useState(420) // 5 minutos en segundos
+  const [timeLeft, setTimeLeft] = useState(420) // 7 minutos en segundos
   const [isRunning, setIsRunning] = useState(false)
-  const [isChecked, setIsChecked] = useState<boolean>(true);
+  const [isChecked, setIsChecked] = useState<boolean>(true)
+  const audioRef = useRef<HTMLAudioElement>(new Audio('/alarm.mp3'))
 
   // Función para manejar el cambio de estado del checkbox
   const handleCheckboxChange = (checked: boolean) => {
-    setIsChecked(checked);
-  };
+    setIsChecked(checked)
+  }
 
+  const playSound = () => {
+    audioRef.current.play()
+  }
+
+  const stopSound = () => {
+    audioRef.current.pause()
+    audioRef.current.currentTime = 0
+  }
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
+
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1)
       }, 1000)
+
+      // Iniciar el sonido cuando quedan 5 segundos o menos
+      if (timeLeft <= 5) {
+        playSound()
+      } else {
+        stopSound()
+      }
     } else if (timeLeft === 0) {
       setIsRunning(false)
+      stopSound()
+    } else {
+      stopSound()
     }
+
     return () => {
       if (interval) clearInterval(interval)
+      stopSound()
     }
   }, [isRunning, timeLeft])
 
@@ -36,7 +58,7 @@ export default function Cronometro() {
 
   const resetTimer = () => {
     setIsRunning(false)
-    setTimeLeft(420)
+    setTimeLeft(420) // Reiniciar a 7 minutos
   }
 
   const formatTime = (seconds: number) => {
@@ -51,7 +73,6 @@ export default function Cronometro() {
     if (timeLeft <= 240) return 'bg-yellow-300'
     
     return 'bg-white'
-    
   }
 
   return (
@@ -66,9 +87,9 @@ export default function Cronometro() {
         />
         <h1 className="text-2xl font-bold">Cronómetro Exposición</h1>
       </nav>
-      <main className={`flex-grow flex flex-col items-center justify-center ${getBackgroundColor()} ${timeLeft <= 5 ? 'animate-pulse' : ''} transition-colors duration-300`}>
+      <main className={`flex-grow flex flex-col items-center justify-center ${getBackgroundColor()} ${timeLeft > 0 && timeLeft <= 5 ? 'animate-pulse' : ''} transition-colors duration-300`}>
         <div className="w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-10 lg:py-20">
-          <div className={`text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-8 text-center  ${isChecked ? 'text-black' : 'text-transparent'}`}>
+          <div className={`text-6xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-8 text-center  ${isChecked ? 'text-black' : 'text-transparent'}`}>
             {formatTime(timeLeft)}
           </div>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
@@ -84,14 +105,12 @@ export default function Cronometro() {
             >
               Reiniciar
             </Button>
-              
           </div>
-          
         </div>
         <div className='flex flex-center items-center gap-x-2'>
-              <p className='text-3xl text-bolder'>Contador</p>
-            <Checkbox  checked={isChecked}   onCheckedChange={handleCheckboxChange} />
-         </div>
+          <p className='text-3xl text-bolder'>Contador</p>
+          <Checkbox checked={isChecked} onCheckedChange={handleCheckboxChange} />
+        </div>
       </main>
     </div>
   )
