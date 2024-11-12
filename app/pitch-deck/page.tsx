@@ -54,13 +54,9 @@ export default function Cronometro() {
       stopSound()
     }
 
-    // Iniciar el contexto de audio solo en el cliente
-    if (isClient) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
-      if (audioRef.current) {
+    if (isClient && audioRef.current === null) {
         audioRef.current = new Audio('/alarm.mp3') // Solo se carga en el cliente
       }
-    }
 
     return () => {
       if (interval) clearInterval(interval)

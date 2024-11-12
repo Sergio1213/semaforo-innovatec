@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from '@/components/ui/checkbox'
 
 export default function Cronometro() {
-  const [timeLeft, setTimeLeft] = useState(300) // 5 minutos en segundos
+  const [timeLeft, setTimeLeft] = useState(10) // 5 minutos en segundos
   const [isRunning, setIsRunning] = useState(false)
   const [isChecked, setIsChecked] = useState<boolean>(true)
   const [isClient, setIsClient] = useState(false) // Estado para verificar si estamos en el cliente
@@ -54,13 +54,9 @@ export default function Cronometro() {
       stopSound()
     }
 
-    // Iniciar el contexto de audio solo en el cliente
-    if (isClient) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
-      if (audioRef.current === null) {
+    if (isClient && audioRef.current === null) {
         audioRef.current = new Audio('/alarm.mp3') // Solo se carga en el cliente
       }
-    }
 
     return () => {
       if (interval) clearInterval(interval)
