@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { Button } from "@/components/ui/button"
@@ -21,15 +20,19 @@ export default function CronometroPersonalizado() {
   const [showConfig, setShowConfig] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isChecked, setIsChecked] = useState(true); // Added state for checkbox
+  const [isClient, setIsClient] = useState(false); // Estado para saber si estamos en el cliente
 
-  // Referencia al audio
-  const audioRef = useRef<HTMLAudioElement>(new Audio('/alarm.mp3'))
+  // Referencia al audio, solo se inicializa en el cliente
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked)
   }
 
   useEffect(() => {
+    // Verificar si estamos en el cliente
+    setIsClient(true)
+
     const loadConfig = async () => {
       setIsLoading(true)
       const savedConfig = localStorage.getItem('timerConfig')
@@ -44,10 +47,13 @@ export default function CronometroPersonalizado() {
       setIsLoading(false)
     }
     loadConfig()
+
     return () => {
       // Limpiar el audio al desmontar el componente
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      }
     }
   }, [])
 
@@ -113,13 +119,24 @@ export default function CronometroPersonalizado() {
   }
 
   const playSound = () => {
-    audioRef.current.play()
+    if (audioRef.current) {
+      audioRef.current.play()
+    }
   }
 
   const stopSound = () => {
-    audioRef.current.pause()
-    audioRef.current.currentTime = 0
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+    }
   }
+
+  // Solo cargar el audio en el cliente
+  useEffect(() => {
+    if (isClient) {
+      audioRef.current = new Audio('/alarm.mp3')
+    }
+  }, [isClient])
 
   return (
     <div className="min-h-screen flex flex-col">

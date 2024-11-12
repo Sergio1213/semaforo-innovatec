@@ -8,24 +8,33 @@ import { Checkbox } from '@/components/ui/checkbox'
 export default function Cronometro() {
   const [timeLeft, setTimeLeft] = useState(180) // 3 minutos en segundos
   const [isRunning, setIsRunning] = useState(false)
-  const [isChecked, setIsChecked] = useState<boolean>(true);
+  const [isChecked, setIsChecked] = useState<boolean>(true)
+  const [isClient, setIsClient] = useState(false) // Estado para saber si estamos en el cliente
+  const audioRef = useRef<HTMLAudioElement | null>(null) // Audio solo se carga en el cliente
   const audioContextRef = useRef<AudioContext | null>(null)
-  const audioRef = useRef<HTMLAudioElement>(new Audio('/alarm.mp3'));
 
   const playSound = () => {
-    audioRef.current.play();
+    if (audioRef.current) {
+      audioRef.current.play()
+    }
   }
 
   const stopSound = () => {
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+    }
   }
+
   // Función para manejar el cambio de estado del checkbox
   const handleCheckboxChange = (checked: boolean) => {
-    setIsChecked(checked);
-  };
+    setIsChecked(checked)
+  }
 
   useEffect(() => {
+    // Establecer que estamos en el cliente
+    setIsClient(true)
+
     let interval: NodeJS.Timeout | null = null
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
@@ -44,7 +53,15 @@ export default function Cronometro() {
     } else {
       stopSound()
     }
-    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+
+    // Iniciar el contexto de audio solo en el cliente
+    if (isClient) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+      if (audioRef.current) {
+        audioRef.current = new Audio('/alarm.mp3') // Solo se carga en el cliente
+      }
+    }
+
     return () => {
       if (interval) clearInterval(interval)
       // Limpiar el contexto de audio al desmontar el componente
@@ -53,7 +70,7 @@ export default function Cronometro() {
       }
       stopSound()
     }
-  }, [isRunning, timeLeft])
+  }, [isRunning, timeLeft, isClient])
 
   const toggleTimer = () => {
     setIsRunning(!isRunning)
@@ -74,48 +91,47 @@ export default function Cronometro() {
     if (isRunning && timeLeft > 120) return 'bg-green-500'
     if (timeLeft <= 60) return 'bg-red-500'
     if (timeLeft <= 120) return 'bg-yellow-300'
-    
     return 'bg-white'
-    
   }
+
   return (
     <div className="h-full flex flex-col">
       <nav className="p-2 flex items-center">
-        <Image 
-          src="/logo_innova.png" 
-          alt="Logo" 
-          width={80} 
-          height={80} 
+        <Image
+          src="/logo_innova.png"
+          alt="Logo"
+          width={80}
+          height={80}
           className="mr-4"
         />
         <h1 className="text-2xl font-bold">Cronómetro Pitch deck</h1>
       </nav>
       <main className={`flex-grow flex flex-col items-center justify-center ${getBackgroundColor()} ${timeLeft > 0 && timeLeft <= 5 ? 'animate-pulse' : ''} transition-colors duration-300`}>
         <div className="w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-10 lg:py-20">
-          <div className={`text-6xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-8 text-center  ${isChecked ? 'text-black' : 'text-transparent'}`}>
+          <div className={`text-6xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-8 text-center ${isChecked ? 'text-black' : 'text-transparent'}`}>
             {formatTime(timeLeft)}
           </div>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <Button 
+            <Button
               onClick={toggleTimer}
               className="text-lg sm:text-xl py-4 px-6 sm:py-6 sm:px-8 w-full sm:w-auto"
             >
               {isRunning ? 'Pausar' : 'Iniciar'}
             </Button>
-            <Button 
+            <Button
               onClick={resetTimer}
               className="text-lg sm:text-xl py-4 px-6 sm:py-6 sm:px-8 w-full sm:w-auto"
             >
               Reiniciar
             </Button>
-              
+
           </div>
-          
+
         </div>
         <div className='flex flex-center items-center gap-x-2'>
-              <p className='text-3xl text-bolder'>Contador</p>
-            <Checkbox  checked={isChecked}   onCheckedChange={handleCheckboxChange} />
-         </div>
+          <p className='text-3xl text-bolder'>Contador</p>
+          <Checkbox checked={isChecked} onCheckedChange={handleCheckboxChange} />
+        </div>
       </main>
     </div>
   )
