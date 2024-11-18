@@ -9,8 +9,10 @@ export default function Cronometro() {
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutos en segundos
   const [isRunning, setIsRunning] = useState(false);
   const [isChecked, setIsChecked] = useState<boolean>(true);
-  const [isClient, setIsClient] = useState(false); // Estado para verificar si estamos en el cliente
-  const audioRef = useRef<HTMLAudioElement | null>(null); // Audio solo se carga en el cliente
+  const [isClient, setIsClient] = useState(false);
+  const [isBlinking, setIsBlinking] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const blinkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Función para manejar el cambio de estado del checkbox
   const handleCheckboxChange = (checked: boolean) => {
@@ -31,7 +33,6 @@ export default function Cronometro() {
   };
 
   useEffect(() => {
-    // Establecer que estamos en el cliente
     setIsClient(true);
 
     let interval: NodeJS.Timeout | null = null;
@@ -40,38 +41,35 @@ export default function Cronometro() {
       interval = setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
-
-      // Iniciar el sonido cuando quedan 5 segundos o menos
-      if (timeLeft <= 5) {
-        playSound();
-      } else {
-        stopSound();
-      }
     } else if (timeLeft === 0) {
       setIsRunning(false);
-      stopSound();
-    } else {
-      stopSound();
+      setIsBlinking(true);
+      playSound();
+      blinkTimeoutRef.current = setTimeout(() => {
+        setIsBlinking(false);
+        stopSound();
+      }, 5000);
     }
 
-    // Iniciar el audio solo en el cliente
     if (isClient && audioRef.current === null) {
-      audioRef.current = new Audio("/alarm.mp3"); // Solo se carga en el cliente
+      audioRef.current = new Audio("/alarm.mp3");
     }
 
     return () => {
       if (interval) clearInterval(interval);
+      if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current);
       stopSound();
     };
   }, [isRunning, timeLeft, isClient]);
-
   const toggleTimer = () => {
     setIsRunning(!isRunning);
   };
 
   const resetTimer = () => {
     setIsRunning(false);
-    setTimeLeft(600); // Reiniciar a 10 minutos
+    setTimeLeft(600);
+    setIsBlinking(false);
+    stopSound();
   };
 
   const formatTime = (seconds: number) => {
@@ -84,7 +82,8 @@ export default function Cronometro() {
 
   const getBackgroundColor = () => {
     if (isRunning && timeLeft > 420) return "bg-green-500";
-    if (timeLeft <= 5) return "bg-red-500";
+    if (isBlinking) return "bg-red-500";
+    if (timeLeft <= 0) return "bg-red-500";
     if (timeLeft <= 420) return "bg-yellow-300";
     return "bg-white";
   };
@@ -103,7 +102,7 @@ export default function Cronometro() {
       </nav>
       <main
         className={`flex-grow flex flex-col items-center justify-center ${getBackgroundColor()} ${
-          timeLeft > 0 && timeLeft <= 5 ? "animate-pulse" : ""
+          isBlinking ? "animate-pulse" : ""
         } transition-colors duration-300`}
       >
         <div className="w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-10 lg:py-20">
