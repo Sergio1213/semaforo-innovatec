@@ -1,91 +1,93 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import Image from 'next/image'
-import { Button } from "@/components/ui/button"
-import { Checkbox } from '@/components/ui/checkbox'
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Cronometro() {
-  const [timeLeft, setTimeLeft] = useState(600) // 10 minutos en segundos
-  const [isRunning, setIsRunning] = useState(false)
-  const [isChecked, setIsChecked] = useState<boolean>(true)
-  const [isClient, setIsClient] = useState(false) // Estado para verificar si estamos en el cliente
-  const audioRef = useRef<HTMLAudioElement | null>(null) // Audio solo se carga en el cliente
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minutos en segundos
+  const [isRunning, setIsRunning] = useState(false);
+  const [isChecked, setIsChecked] = useState<boolean>(true);
+  const [isClient, setIsClient] = useState(false); // Estado para verificar si estamos en el cliente
+  const audioRef = useRef<HTMLAudioElement | null>(null); // Audio solo se carga en el cliente
 
   // Función para manejar el cambio de estado del checkbox
   const handleCheckboxChange = (checked: boolean) => {
-    setIsChecked(checked)
-  }
+    setIsChecked(checked);
+  };
 
   const playSound = () => {
     if (audioRef.current) {
-      audioRef.current.play()
+      audioRef.current.play();
     }
-  }
+  };
 
   const stopSound = () => {
     if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
-  }
+  };
 
   useEffect(() => {
     // Establecer que estamos en el cliente
-    setIsClient(true)
+    setIsClient(true);
 
-    let interval: NodeJS.Timeout | null = null
+    let interval: NodeJS.Timeout | null = null;
 
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1)
-      }, 1000)
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
 
       // Iniciar el sonido cuando quedan 5 segundos o menos
       if (timeLeft <= 5) {
-        playSound()
+        playSound();
       } else {
-        stopSound()
+        stopSound();
       }
     } else if (timeLeft === 0) {
-      setIsRunning(false)
-      stopSound()
+      setIsRunning(false);
+      stopSound();
     } else {
-      stopSound()
+      stopSound();
     }
 
     // Iniciar el audio solo en el cliente
     if (isClient && audioRef.current === null) {
-      audioRef.current = new Audio('/alarm.mp3') // Solo se carga en el cliente
+      audioRef.current = new Audio("/alarm.mp3"); // Solo se carga en el cliente
     }
 
     return () => {
-      if (interval) clearInterval(interval)
-      stopSound()
-    }
-  }, [isRunning, timeLeft, isClient])
+      if (interval) clearInterval(interval);
+      stopSound();
+    };
+  }, [isRunning, timeLeft, isClient]);
 
   const toggleTimer = () => {
-    setIsRunning(!isRunning)
-  }
+    setIsRunning(!isRunning);
+  };
 
   const resetTimer = () => {
-    setIsRunning(false)
-    setTimeLeft(600) // Reiniciar a 10 minutos
-  }
+    setIsRunning(false);
+    setTimeLeft(600); // Reiniciar a 10 minutos
+  };
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
 
   const getBackgroundColor = () => {
-    if (isRunning && timeLeft > 300) return 'bg-green-500'
-    if (timeLeft <= 120) return 'bg-red-500'
-    if (timeLeft <= 300) return 'bg-yellow-300'
-    return 'bg-white'
-  }
+    if (isRunning && timeLeft > 420) return "bg-green-500";
+    if (timeLeft <= 5) return "bg-red-500";
+    if (timeLeft <= 420) return "bg-yellow-300";
+    return "bg-white";
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -99,9 +101,17 @@ export default function Cronometro() {
         />
         <h1 className="text-2xl font-bold">Cronómetro Stand</h1>
       </nav>
-      <main className={`flex-grow flex flex-col items-center justify-center ${getBackgroundColor()} ${timeLeft > 0 && timeLeft <= 5 ? 'animate-pulse' : ''} transition-colors duration-300`}>
+      <main
+        className={`flex-grow flex flex-col items-center justify-center ${getBackgroundColor()} ${
+          timeLeft > 0 && timeLeft <= 5 ? "animate-pulse" : ""
+        } transition-colors duration-300`}
+      >
         <div className="w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-10 lg:py-20">
-          <div className={`text-8xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-8 text-center ${isChecked ? 'text-black' : 'text-transparent'}`}>
+          <div
+            className={`text-8xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-8 text-center ${
+              isChecked ? "text-black" : "text-transparent"
+            }`}
+          >
             {formatTime(timeLeft)}
           </div>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
@@ -109,7 +119,7 @@ export default function Cronometro() {
               onClick={toggleTimer}
               className="text-lg sm:text-xl py-4 px-6 sm:py-6 sm:px-8 w-full sm:w-auto"
             >
-              {isRunning ? 'Pausar' : 'Iniciar'}
+              {isRunning ? "Pausar" : "Iniciar"}
             </Button>
             <Button
               onClick={resetTimer}
@@ -119,11 +129,14 @@ export default function Cronometro() {
             </Button>
           </div>
         </div>
-        <div className='flex flex-center items-center gap-x-2'>
-          <p className='text-3xl text-bolder'>Contador</p>
-          <Checkbox checked={isChecked} onCheckedChange={handleCheckboxChange} />
+        <div className="flex flex-center items-center gap-x-2">
+          <p className="text-3xl text-bolder">Contador</p>
+          <Checkbox
+            checked={isChecked}
+            onCheckedChange={handleCheckboxChange}
+          />
         </div>
       </main>
     </div>
-  )
+  );
 }
