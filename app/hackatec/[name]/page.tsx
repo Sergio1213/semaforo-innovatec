@@ -2,25 +2,28 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Cronometro() {
   const params = useParams();
+  const pathname = usePathname(); // Codificado
+  const decodedPath = decodeURIComponent(pathname);
+  const cleanPath = decodedPath.split("/").slice(2).join("/");
   const routeName = params.name as string;
 
   // Función para determinar la duración total y los umbrales de color basados en el nombre de la ruta
   const getTimerSettings = (name: string) => {
     switch (name) {
-      case "Expo":
+      case "Exposici%C3%B3n":
         return { total: 420, yellowThreshold: 300, greenThreshold: 300 };
       case "Prototipo":
         return { total: 420, yellowThreshold: 300, greenThreshold: 180 };
-      case "Preguntas":
+      case "Preguntas%20y%20Respuestas":
         return { total: 360, yellowThreshold: 240, greenThreshold: 240 };
       default:
-        return { total: 420, yellowThreshold: 180, greenThreshold: 240 };
+        return { total: 40, yellowThreshold: 180, greenThreshold: 240 };
     }
   };
 
@@ -119,7 +122,7 @@ export default function Cronometro() {
           height={80}
           className="mr-4"
         />
-        <h1 className="text-2xl font-bold">Cronómetro {routeName}</h1>
+        <h1 className="text-2xl font-bold">{cleanPath} hackatec </h1>
       </nav>
       <main
         className={`flex-grow flex flex-col items-center justify-center ${getBackgroundColor()} ${
