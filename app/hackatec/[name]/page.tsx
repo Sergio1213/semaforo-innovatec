@@ -19,7 +19,7 @@ export default function Cronometro() {
       case "Exposici%C3%B3n":
         return { total: 420, yellowThreshold: 300, greenThreshold: 300 };
       case "Prototipo":
-        return { total: 420, yellowThreshold: 300, greenThreshold: 180 };
+        return { total: 420, yellowThreshold: 300, greenThreshold: 300 };
       case "Preguntas%20y%20Respuestas":
         return { total: 360, yellowThreshold: 240, greenThreshold: 240 };
       default:
