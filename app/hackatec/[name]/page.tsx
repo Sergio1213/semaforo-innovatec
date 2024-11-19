@@ -17,11 +17,11 @@ export default function Cronometro() {
   const getTimerSettings = (name: string) => {
     switch (name) {
       case "Exposici%C3%B3n":
-        return { total: 420, yellowThreshold: 300, greenThreshold: 300 };
+        return { total: 420, yellowThreshold: 120, greenThreshold: 120 };
       case "Prototipo":
-        return { total: 420, yellowThreshold: 300, greenThreshold: 300 };
+        return { total: 420, yellowThreshold: 120, greenThreshold: 120 };
       case "Preguntas%20y%20Respuestas":
-        return { total: 360, yellowThreshold: 240, greenThreshold: 240 };
+        return { total: 360, yellowThreshold: 120, greenThreshold: 120 };
       default:
         return { total: 40, yellowThreshold: 180, greenThreshold: 240 };
     }
