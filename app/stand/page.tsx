@@ -81,10 +81,10 @@ export default function Cronometro() {
   };
 
   const getBackgroundColor = () => {
-    if (isRunning && timeLeft > 420) return "bg-green-500";
+    if (isRunning && timeLeft > 180) return "bg-green-500";
     if (isBlinking) return "bg-red-500";
     if (timeLeft <= 0) return "bg-red-500";
-    if (timeLeft <= 420) return "bg-yellow-300";
+    if (timeLeft <= 180) return "bg-yellow-300";
     return "bg-white";
   };
 

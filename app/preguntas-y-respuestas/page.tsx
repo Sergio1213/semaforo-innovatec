@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Cronometro() {
-  const [timeLeft, setTimeLeft] = useState(420); // 7 minutos en segundos
+  const [timeLeft, setTimeLeft] = useState(300); // 7 minutos en segundos
   const [isRunning, setIsRunning] = useState(false);
   const [isChecked, setIsChecked] = useState<boolean>(true);
   const [isClient, setIsClient] = useState(false);
@@ -67,7 +67,7 @@ export default function Cronometro() {
 
   const resetTimer = () => {
     setIsRunning(false);
-    setTimeLeft(420);
+    setTimeLeft(300);
     setIsBlinking(false);
     stopSound();
   };

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Cronometro() {
-  const [timeLeft, setTimeLeft] = useState(420); // 10 minutos en segundos
+  const [timeLeft, setTimeLeft] = useState(420); // 7 minutos en segundos
   const [isRunning, setIsRunning] = useState(false);
   const [isChecked, setIsChecked] = useState<boolean>(true);
   const [isClient, setIsClient] = useState(false);
@@ -67,7 +67,7 @@ export default function Cronometro() {
 
   const resetTimer = () => {
     setIsRunning(false);
-    setTimeLeft(600);
+    setTimeLeft(420);
     setIsBlinking(false);
     stopSound();
   };
@@ -81,9 +81,9 @@ export default function Cronometro() {
   };
 
   const getBackgroundColor = () => {
-    if (isRunning && timeLeft > 300) return "bg-green-500";
+    if (isRunning && timeLeft > 180) return "bg-green-500";
     if (isBlinking) return "bg-red-500";
-    if (timeLeft <= 300) return "bg-yellow-300";
+    if (timeLeft <= 180) return "bg-yellow-300";
     if (timeLeft <= 0) return "bg-red-500";
     return "bg-white";
   };
