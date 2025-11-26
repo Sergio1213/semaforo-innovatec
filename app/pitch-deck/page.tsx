@@ -90,13 +90,29 @@ export default function Cronometro() {
   return (
     <div className="h-full flex flex-col">
       <nav className="p-2 flex items-center">
-        <Image
-          src="/logo_innova.png"
-          alt="Logo"
-          width={80}
-          height={80}
-          className="mr-4"
-        />
+        <div className=" items-center">
+          <Image
+            src="/logoInnovatec.png"
+            alt="Logo"
+            width={80}
+            height={80}
+            className="mr-4"
+          />
+
+          <p
+            className="
+              text-2xl font-extrabold
+              text-red-700
+              relative
+              drop-shadow-[4px_4px_0px_rgba(0,0,0,0.3)]
+            "
+            style={{
+              textShadow: "4px 4px 0 #ccc", // sombra tipo 3D como la de tu imagen
+            }}
+          >
+            {new Date().getFullYear()}
+          </p>
+        </div>
         <h1 className="text-2xl font-bold">Cronómetro Pitch Deck</h1>
       </nav>
       <main
